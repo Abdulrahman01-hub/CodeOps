@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        /* Genel stil ayarları */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .container {
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Liste ve öğe stilleri */
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+
+        li:hover {
+            background-color: #f9fafb;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .task-title {
+            flex: 1;
+            text-align: left;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .task-actions input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .delete-task {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Yeni görev ekleme stil */
+        .add-task {
+            display: flex;
+            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .add-task input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .add-task button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-task button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Checkbox stilleri */
+        input[type="checkbox"] {
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <ul id="task-list">
+            {% for task in tasks %}
+            <li data-id="{{ task.id }}">
+                <span class="task-title {% if task.completed %}completed{% endif %}">{{ task.title }}</span>
+                <div class="task-actions">
+                    <input type="checkbox" class="toggle-completed" {% if task.completed %}checked{% endif %}>
+                    <button class="delete-task">x</button>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="add-task">
+            <input type="text" id="new-task" placeholder="Add a new task">
+            <button id="add-task-btn">Add</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Yeni görev ekle
+            $('#add-task-btn').on('click', function () {
+                const title = $('#new-task').val();
+                if (title) {
+                    $.post('/add/', { title: title, csrfmiddlewaretoken: '{{ csrf_token }}' }, function (response) {
+                        if (response.status === 'success') {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+
+            // Görev tamamlanmasını değiştir
+            $('.toggle-completed').on('change', function () {
+                const taskId = $(this).closest('li').data('id');
+                $.get(`/update/${taskId}/`, function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    }
+                });
+            });
+
+            // Görevi sil
+            $('.delete-task').on('click', function () {
+                const taskId = $(this).closest('li').data('id');
+                $.get(`/delete/${taskId}/`, function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
