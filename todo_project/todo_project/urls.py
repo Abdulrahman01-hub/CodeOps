@@ -14,12 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin  # Admin panelini import et
-from tasks import views  # tasks uygulamasından views modülünü import et
+from django.contrib import admin
+from tasks import views
 from django.urls import path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Admin paneline yönlendiren URL
+    path('admin/', admin.site.urls),
     path('', views.task_list, name='task_list'),
     path('add/', views.add_task, name='add_task'),
     path('update/<int:task_id>/', views.update_task, name='update_task'),
